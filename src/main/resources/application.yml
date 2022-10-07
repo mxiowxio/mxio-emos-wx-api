@@ -1,0 +1,99 @@
+#tomcat和端口相关配置
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    threads:
+      max: 200
+      min-spare: 30
+    connection-timeout: 5000ms
+  port: 8989
+  servlet:
+    context-path: /mxio-emos-wx-ape
+
+#mysql相关配置
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wx-app-emos?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: root
+    tomcat:
+      initial-size: 6
+      min-idle: 6
+      max-idle: 12
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+    dbcp2:
+      pool-prepared-statements: true
+#配置redis数据源
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password: abc123456
+    jedis:
+      pool:
+        max-active: 1000
+        max-wait: -1ms
+        max-idle: 16
+        min-idle: 8
+#配置mongoDB数据源
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: emos
+      authentication-database: admin
+      username: admin
+      password: abc123456
+  mail:
+    default-encoding: UTF-8
+    host: smtp.aliyun.com
+    username: mxio0312@aliyun.com
+    password: Mxio0312
+
+#配置mybatis
+mybatis:
+  mapper-locations: classpath*:com/mxio/mapper/*.xml
+  type-aliases-package: com.mxio.emos.wx.db.pojo
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+
+#定义日志输出
+logging:
+  level:
+    root: info
+    com.mxio.emos.wx.db.mapper: warn
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %msg%n"
+
+
+emos:
+  jwt:
+    secret: mxio0312
+    #设置过期时间
+    expire: 5
+    #设置缓存过期时间
+    cache-expire: 10
+  face:
+    createFaceModelUrl: http://192.168.1.111:3000/create_face_model
+    checkinUrl: http://192.168.1.111:3000/checkin
+  email:
+    system: mxio0312@aliyun.com
+    hr: 937931428@qq.com
+  image-folder: I:\wx-App\image
+  code: 0C514E94265A5631  #0C514E94265A5631
+#8Tp06ax7
+
+wx:
+  #AppID(小程序ID)
+  app-id: wx5929bce734273283
+  #AppSecret(小程序密钥)
+  app-secret: e443c57bdc7812d68a62bede7776add4

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mxio.emos.wx.db.mapper.TbDeptMapper">
+
+    <select id="searchDeptName" parameterType="int" resultType="String">
+        select dept_name from tb_dept where id=#{deptId}
+    </select>
+
+</mapper>
