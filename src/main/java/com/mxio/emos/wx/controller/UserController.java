@@ -138,4 +138,15 @@ public class UserController {
         // 返回
         return R.ok("登陆成功").put("token", token).put("permission", permsSet);
     }
+
+    @GetMapping("searchUserSummary")
+    @ApiOperation("查询用户摘要信息")
+    public R searchUserSummary(@RequestHeader("token") String token) {
+        // 将令牌中的userId取出
+        int userId = jwtUtil.getUserId(token);
+        // 调用接口查询数据并接收
+        HashMap map = userService.searchUserSummary(userId);
+        return R.ok().put("result", map);
+    }
+
 }

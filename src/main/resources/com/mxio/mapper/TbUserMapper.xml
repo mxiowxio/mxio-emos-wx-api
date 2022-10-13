@@ -24,7 +24,7 @@
         FROM tb_user u
         JOIN tb_role r ON JSON_CONTAINS(u.role, CAST(r.id AS CHAR))
         JOIN tb_permission p ON JSON_CONTAINS(r.permissions, CAST(p.id AS CHAR))
-        WHERE u.id=#{userId} AND u.status=1;
+        WHERE u.id=#{userId} AND u.status=1
     </select>
 
     <select id="searchById" parameterType="int" resultType="com.mxio.emos.wx.db.pojo.TbUserPo">
@@ -40,9 +40,16 @@
         WHERE u.id = #{userId} AND u.status = 1
     </select>
 
+<!--    parameterType: 传入参数类型     resultType: 返回参数类型-->
     <select id="searchUserHiredate" parameterType="int" resultType="String">
         select hiredate from tb_user
         where id=#{userId} and status=1
+    </select>
+
+    <select id="searchUserSummary" parameterType="int" resultType="HashMap">
+        select u.name, u.photo, d.dept_name as deptName
+        from tb_user u left join tb_dept d on u.dept_id=d.id
+        where u.id=#{userId} and u.status=1
     </select>
 
     <insert id="insert" parameterType="HashMap">

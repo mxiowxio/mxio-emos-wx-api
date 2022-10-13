@@ -161,17 +161,17 @@ public class CheckinServiceImpl implements CheckinService {
         int userId = (Integer) param.get("userId");
         // todo 查询疫情风险等级
         //  1是低风险，2中风险，3高风险
-        //int risk = 1;
+        int risk = 1;
         String city = (String) param.get("city");
         String district = (String) param.get("district");
         String address = (String) param.get("address");
         String country = (String) param.get("country");
         String province = (String) param.get("province");
-        log.info("city:",city);
-        log.info("district",district);
-        log.info("address",address);
-        log.info("country",country);
-        log.info("province",province);
+        log.info("city:", city);
+        log.info("district", district);
+        log.info("address", address);
+        log.info("country", country);
+        log.info("province", province);
         // 还要将地区的code传入html中，获取html里面的信息，作判断是不是高风险地区
         /*if (!StrUtil.isBlank(city) && !StrUtil.isBlank(district)) {
             String code = CityDao.searchCode(city);
@@ -223,6 +223,7 @@ public class CheckinServiceImpl implements CheckinService {
         entity.setCity(city);
         entity.setDistrict(district);
         entity.setStatus((byte) status);
+        entity.setRisk(risk);
         entity.setDate(DateUtil.today());
         entity.setCreateTime(d1);
         checkinDao.insert(entity);
@@ -351,8 +352,7 @@ public class CheckinServiceImpl implements CheckinService {
             }
             if (holidaysList != null && holidaysList.contains(date)) {  // 查询是否是特殊节假日
                 type = "节假日";
-            }
-            else if (workdayList != null && workdayList.contains(date)) {   // 查询是否是特殊工作日
+            } else if (workdayList != null && workdayList.contains(date)) {   // 查询是否是特殊工作日
                 type = "工作日";
             }
             // 查看考勤结果
@@ -398,6 +398,11 @@ public class CheckinServiceImpl implements CheckinService {
             list.add(map);
         });
         return list;
+    }
+
+    @Override
+    public ArrayList<HashMap> searchMonthCheckin(HashMap param) {
+        return this.searchWeekCheckin(param);
     }
 }
 

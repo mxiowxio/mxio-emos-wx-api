@@ -27,6 +27,8 @@ public interface TbUserMapper {
 
     public String searchUserHiredate(int userId);
 
+    public HashMap searchUserSummary(int userId);
+
 
 }
 

@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
         /*从string转换成json*/
         JSONObject json = JSONUtil.parseObj(response);
 
-        System.out.println("json:"+json);
+        System.out.println("json:" + json);
 
         /*从json格式中获取openid*/
         String openId = json.getStr("openid");
@@ -90,35 +90,52 @@ public class UserServiceImpl implements UserService {
         // 填入的注册码是超级管理员邀请码，判断数据库中有没有信息
         if (registerCode.equals("000000")) {
             // 查询超级管理员账号是否已经绑定
-            Boolean bool = userDao.haveRootUser();
-            if (!bool) {
-                // 把当前用户绑定到root账户中
-                String openId = getOpenId(code);
-                // 把当前用户绑定到root账户中，通过
-                HashMap param = new HashMap();
-                // 如果不存在超级管理员账户，添加信息
-                param.put("openId", openId);
-                param.put("nickname", nickname);
-                param.put("photo", photo);
-                param.put("role", "[0]");
-                param.put("status", 1);
-                param.put("createTime", new Date());
-                param.put("root", true);
-                userDao.insert(param);
-                // 通过微信发来的openid，从数据库中查找id
-                Integer id = userDao.searchIdByOpenId(openId);
-                return id;
-            }
+//            Boolean bool = userDao.haveRootUser();
+//            if (!bool) {
+            // 把当前用户绑定到root账户中
+            String openId = getOpenId(code);
+            // 把当前用户绑定到root账户中，通过
+            HashMap param = new HashMap();
+            // 如果不存在超级管理员账户，添加信息
+            param.put("openId", openId);
+            param.put("nickname", nickname);
+            param.put("photo", photo);
+            param.put("role", "[1, 2, 3, 4, 5, 6, 7, 8]");
+            param.put("status", 1);
+            param.put("createTime", new Date());
+            param.put("root", true);
+            userDao.insert(param);
+            // 通过微信发来的openid，从数据库中查找id
+            Integer id = userDao.searchIdByOpenId(openId);
+            return id;
+//            }
 
             // 数据库中存在，则抛出异常
-            else {
+            /*else {
                 throw new EmosException("无法绑定超级管理员账号");
-            }
+            }*/
         }
 
         // 填入的不是000000超级管理员激活码，则是普通用户的邀请码输入
-        else {
+        if (registerCode.equals("123456")) {
             // 普通员工注册
+            // 把当前用户绑定到普通账户中
+            String openId = getOpenId(code);
+            // 把当前用户绑定到root账户中，通过
+            HashMap param = new HashMap();
+            // 如果不存在超级管理员账户，添加信息
+            param.put("openId", openId);
+            param.put("nickname", nickname);
+            param.put("photo", photo);
+            param.put("role", "[0]");
+            param.put("status", 1);
+            param.put("createTime", new Date());
+            param.put("root", true);
+            userDao.insert(param);
+            // 通过微信发来的openid，从数据库中查找id
+            Integer id = userDao.searchIdByOpenId(openId);
+            return id;
+
         }
         return 0;
     }
@@ -126,7 +143,9 @@ public class UserServiceImpl implements UserService {
     // 底层查询到的权限，返回Set<String>，set表表示不重复显示，String里面是权限具体信息
     @Override
     public Set<String> searchUserPermissions(int userId) {
+        System.out.println("userId:" + userId);
         Set<String> permissions = userDao.searchUserPermissions(userId);
+        System.out.println("permissions:" + permissions);
         return permissions;
     }
 
@@ -165,12 +184,20 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 查询员工入职日期
+     *
      * @param userId
      * @return
      */
     @Override
     public String searchUserHiredate(int userId) {
+        // 定义一个变量保存入职日期
         String hiredate = userDao.searchUserHiredate(userId);
         return hiredate;
+    }
+
+    @Override
+    public HashMap searchUserSummary(int userId) {
+        HashMap map = userDao.searchUserSummary(userId);
+        return map;
     }
 }

@@ -7,11 +7,13 @@ import com.mxio.emos.wx.common.util.R;
 import com.mxio.emos.wx.config.SystemConstants;
 import com.mxio.emos.wx.config.shiro.JwtUtil;
 import com.mxio.emos.wx.controller.form.CheckinForm;
+import com.mxio.emos.wx.controller.form.SearchMonthCheckinForm;
 import com.mxio.emos.wx.db.mapper.TbCheckinMapper;
 import com.mxio.emos.wx.exception.EmosException;
 import com.mxio.emos.wx.service.CheckinService;
 import com.mxio.emos.wx.service.UserService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,6 +179,55 @@ public class CheckinController {
         // 将考勤结果返回
         return R.ok().put("result", map);
 
+    }
+
+
+    @PostMapping("searchMonthCheckin")
+    @ApiOperation("查询用户某月签到数据")
+    public R searchMonthCheckin(@Valid @RequestBody SearchMonthCheckinForm form, @RequestHeader("token") String token) {
+        // 获取用户userId
+        int userId = jwtUtil.getUserId(token);
+        // 查询员工入职日期
+        DateTime hiredate = DateUtil.parse(userService.searchUserHiredate(userId));
+        // 把月份处理成双数字
+        String month = form.getMonth() < 10 ? "0" + form.getMonth() : form.getMonth().toString();
+        // 某年某月的起始日期
+        DateTime startDate = DateUtil.parse(form.getYear() + "-" + month + "-01");
+        // 如果查询的月份早于员工入职的日期的月份就抛异常
+        if (startDate.isBefore(DateUtil.beginOfMonth(hiredate))) {
+            throw new EmosException("只能查询考勤之后日期的数据");
+        }
+        // 如果查询月份于入职月份恰好是同日，本月考勤查询开始日期设置成入职日期
+        if (startDate.isBefore(hiredate)) {
+            startDate = hiredate;
+        }
+        DateTime endDate = DateUtil.endOfMonth(startDate);
+        HashMap param = new HashMap();
+        param.put("userId", userId);
+        param.put("startDate", startDate.toString());
+        param.put("endDate", endDate.toString());
+        ArrayList<HashMap> list = checkinService.searchMonthCheckin(param);
+        int sum_1 = 0, sum_2 = 0, sum_3 = 0;
+        for (HashMap<String, String> one : list) {
+            // 知道当天是什么类型
+            String type = one.get("type");
+            // 保存当天这一天的考勤结果
+            String status = one.get("status");
+            // 判断考勤状态
+            if ("工作日".equals(type)) {
+                if ("正常".equals(status)) {
+                    sum_1++;
+                }
+                else if ("迟到".equals(status)) {
+                    sum_2++;
+                }
+                else if ("缺勤".equals(status)) {
+                    sum_3++;
+                }
+            }
+        }
+        // 统计当月考勤的各种天数
+        return R.ok().put("list", list).put("sum_1", sum_1).put("sum_2", sum_2).put("sum_3", sum_3);
     }
 
 }

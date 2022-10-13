@@ -31,7 +31,7 @@ spring:
       test-on-return: false
     dbcp2:
       pool-prepared-statements: true
-#配置redis数据源
+  #配置redis数据源
   redis:
     database: 0
     host: localhost
@@ -43,7 +43,7 @@ spring:
         max-wait: -1ms
         max-idle: 16
         min-idle: 8
-#配置mongoDB数据源
+  #配置mongoDB数据源
   data:
     mongodb:
       host: localhost

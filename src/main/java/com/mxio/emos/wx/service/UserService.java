@@ -2,6 +2,7 @@ package com.mxio.emos.wx.service;
 
 import com.mxio.emos.wx.db.pojo.TbUserPo;
 
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -20,5 +21,7 @@ public interface UserService {
     public TbUserPo searchById(int userId);
 
     public String searchUserHiredate(int userId);
+
+    public HashMap searchUserSummary(int userId);
 
 }
