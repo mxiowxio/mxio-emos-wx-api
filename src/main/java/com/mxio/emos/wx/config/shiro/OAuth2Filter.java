@@ -47,15 +47,20 @@ public class OAuth2Filter extends AuthenticatingFilter {
     @Autowired
     private ThreadLocalToken threadLocalToken;
 
-    // 考察的一个知识点，从xml文件中获取属性文件的属性值
+    /**
+     * 考察的一个知识点，从xml文件中获取属性文件的属性值
+     */
     @Value(("${emos.jwt.cache-expire}"))
     private int cacheExpire;
 
     @Autowired
     private JwtUtil jwtUtil;
 
+    /**
+     * redis对象，对redis对象读写操作，把redis传入threadLocalToken和redis
+     */
     @Autowired
-    private RedisTemplate redisTemplate;    //redis对象，对redis对象读写操作，把redis传入threadLocalToken和redis
+    private RedisTemplate redisTemplate;
 
 
     /**
@@ -72,7 +77,8 @@ public class OAuth2Filter extends AuthenticatingFilter {
         HttpServletRequest req = (HttpServletRequest) request;
         // 获取请求token
         String token = getRequestToken(req);
-        if (StrUtil.isBlank(token)) {   //如果获取到的token中是空值的而且是空字符串，则返回null即可结束，否则继续
+        //如果获取到的token中是空值的而且是空字符串，则返回null即可结束，否则继续
+        if (StrUtil.isBlank(token)) {
             return null;
         }   //👆从抽象请求中获取令牌字符串，👇然后将字符串交给OAuth2Token方法，OAuth2Token会把令牌字符串封装成对象。
         return new OAuth2Token(token);
@@ -147,10 +153,13 @@ public class OAuth2Filter extends AuthenticatingFilter {
             jwtUtil.verifierToken(token);
         } catch (TokenExpiredException e) {
             // 判定 Redis 中缓存的令牌是否过期
-            if (redisTemplate.hasKey(token)) {  // 如果存在，则说明客户端保存的令牌已过期，服务的的令牌未过期，进行令牌的刷新
-                redisTemplate.delete(token);    // 删除老令牌
+            // 如果存在，则说明客户端保存的令牌已过期，服务的的令牌未过期，进行令牌的刷新
+            if (redisTemplate.hasKey(token)) {
+                // 删除老令牌
+                redisTemplate.delete(token);
                 int userId = jwtUtil.getUserId(token);
-                token = jwtUtil.createToken(userId);    // 生成新的令牌
+                // 生成新的令牌
+                token = jwtUtil.createToken(userId);
                 redisTemplate.opsForValue().set(token, userId + "", cacheExpire, TimeUnit.DAYS);
                 threadLocalToken.setToken(token);
             } else {  // 客户端和服务端的令牌均过期，需要用户重新登陆
@@ -202,7 +211,9 @@ public class OAuth2Filter extends AuthenticatingFilter {
         super.doFilterInternal(request, response, chain);
     }
 
-    //从请求中获取里面的token字符串
+    /**
+     * 从请求中获取里面的token字符串
+     */
     private String getRequestToken(HttpServletRequest request) {
         //从请求头里面获取token
         String token = request.getHeader("token");

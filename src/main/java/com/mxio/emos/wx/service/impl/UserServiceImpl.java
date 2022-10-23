@@ -140,7 +140,9 @@ public class UserServiceImpl implements UserService {
         return 0;
     }
 
-    // 底层查询到的权限，返回Set<String>，set表表示不重复显示，String里面是权限具体信息
+    /**
+     * 底层查询到的权限，返回Set<String>，set表表示不重复显示，String里面是权限具体信息
+     */
     @Override
     public Set<String> searchUserPermissions(int userId) {
         System.out.println("userId:" + userId);

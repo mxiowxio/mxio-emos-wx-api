@@ -38,7 +38,6 @@ public class TokenAspect {
     /**
      * 拦截点
      */
-
     @Pointcut("execution(public * com.mxio.emos.wx.controller.*.*(..))")
     public void aspect() {
 
@@ -49,14 +48,15 @@ public class TokenAspect {
     /**
      * 拦截点中执行的方法
      */
-
     @Around("aspect()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
-        R r = (R) point.proceed();  // 方法执行结果
+        // 方法执行结果
+        R r = (R) point.proceed();
         String token = threadLocalToken.getToken();
         // 如果ThreadLocal中存在token，说明是更新的token
         if (token != null) {
-            r.put("token", token);  // 往响应中放置token
+            // 往响应中放置token
+            r.put("token", token);
             threadLocalToken.clear();
         }
         return r;

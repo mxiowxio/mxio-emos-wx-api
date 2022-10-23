@@ -27,7 +27,9 @@ public class JwtUtil {
     @Value("${emos.jwt.expire}")
     private int expire;
 
-    // 生成令牌方法
+    /**
+     * 生成令牌方法
+     */
     public String createToken(int userId) {
         //1. 计算过期日期是哪一天
         Date date = DateUtil.offset(new Date(), DateField.DAY_OF_YEAR, 5);
@@ -40,7 +42,9 @@ public class JwtUtil {
         return token;
     }
 
-    // 从令牌中反向获得用户id的方法
+    /**
+     * 从令牌中反向获得用户id的方法
+     */
     public int getUserId(String token) {
         // 对令牌字符串进行解码
         DecodedJWT jwt = JWT.decode(token);
@@ -48,7 +52,9 @@ public class JwtUtil {
         return userId;
     }
 
-    // 验证令牌字符串有效性的方法
+    /**
+     * 验证令牌字符串有效性的方法
+     */
     public void verifierToken(String token) {
         //1. 创建算法对象
         Algorithm algorithm = Algorithm.HMAC256(secret);

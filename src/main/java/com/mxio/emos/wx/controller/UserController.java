@@ -35,15 +35,21 @@ import java.util.concurrent.TimeUnit;
 @Api("用户模块Web接口")
 public class UserController {
 
-    // 调用业务层代码
+    /**
+     * 调用业务层代码
+      */
     @Autowired
     private UserService userService;
 
-    // 用户注册成功后，向客户端返回，jwt生成令牌字符串
+    /**
+     * 用户注册成功后，向客户端返回，jwt生成令牌字符串
+     */
     @Autowired
     private JwtUtil jwtUtil;
 
-    // 将令牌不仅要缓存到客户端，还要到redis里面
+    /**
+     * 将令牌不仅要缓存到客户端，还要到redis里面
+     */
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -79,8 +85,8 @@ public class UserController {
      */
     private void saveCacheToken(String token, int userId) {
         // 保存数据，key是token，value是id，刷新令牌，以后可以根据对应的id刷新令牌，可以根据userId重新生令牌
-        /**
-         * set(K key, V value, long timeout, TimeUnit unit) 设置变量值的过期时间。
+        /*
+          set(K key, V value, long timeout, TimeUnit unit) 设置变量值的过期时间。
          */
         redisTemplate.opsForValue().set(token, userId + "", cacheExpire, TimeUnit.DAYS);
     }

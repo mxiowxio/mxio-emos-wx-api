@@ -115,7 +115,8 @@ public class CheckinServiceImpl implements CheckinService {
             String end = DateUtil.today() + " " + constants.attendanceEndTime;
 
             //start，end转化为DateTime，DateTime的比较
-            DateTime attendanceStart = DateUtil.parse(start);   // 将日期字符串转化为日期。parse：解析
+            // 将日期字符串转化为日期。parse：解析
+            DateTime attendanceStart = DateUtil.parse(start);
             DateTime attendanceEnd = DateUtil.parse(end);
             if (now.isBefore(attendanceStart)) {
                 return "还没开始考勤呢~";
@@ -137,7 +138,9 @@ public class CheckinServiceImpl implements CheckinService {
         }
     }
 
-    //时间->地区风险->->->
+    /**
+     * 时间->地区风险->->->
+     */
     @Override
     public void checkin(HashMap param) {
         // 当前时间
@@ -152,7 +155,8 @@ public class CheckinServiceImpl implements CheckinService {
         // 开始之前
         if (d1.compareTo(d2) <= 0) {
             status = 1;
-        } else if (d1.compareTo(d2) > 0 && d1.compareTo(d3) < 0) {  //开始之后，结束之前
+            //开始之后，结束之前
+        } else if (d1.compareTo(d2) > 0 && d1.compareTo(d3) < 0) {
             status = 2;
         } else {
             throw new EmosException("超出考勤时间段，无法考勤");
@@ -339,7 +343,8 @@ public class CheckinServiceImpl implements CheckinService {
         // 生成本周七天的日期对象，起始日期(startDate)和结束日期(endDate)
         DateTime startDate = DateUtil.parseDate(param.get("startDate").toString());
         DateTime endDate = DateUtil.parseDate(param.get("endDate").toString());
-        DateRange range = DateUtil.range(startDate, endDate, DateField.DAY_OF_MONTH);   // 生成日期对象
+        // 生成日期对象
+        DateRange range = DateUtil.range(startDate, endDate, DateField.DAY_OF_MONTH);
         ArrayList<HashMap> list = new ArrayList<>();
         // 拿日期对象看当天是工作日还是节假日，如果是工作日则查看当天的考勤情况
         range.forEach(one -> {
@@ -366,7 +371,8 @@ public class CheckinServiceImpl implements CheckinService {
             if (type.equals("工作日") && DateUtil.compare(one, DateUtil.date()) <= 0) {
                 status = "缺勤";
                 boolean flag = false;
-                for (HashMap<String, String> map : checkinList) {    // 如果能查到当前的考勤结果，则取出，反之则为缺勤旷工
+                // 如果能查到当前的考勤结果，则取出，反之则为缺勤旷工
+                for (HashMap<String, String> map : checkinList) {
                     // 查看map是否含有当前日期，如果有则取出来
                     if (map.containsValue(date)) {
                         // 取出考勤结果
