@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.mxio.emos.wx.db.mapper.TbDeptMapper;
 import com.mxio.emos.wx.db.mapper.TbUserMapper;
 import com.mxio.emos.wx.db.pojo.TbUserPo;
 import com.mxio.emos.wx.exception.EmosException;
@@ -33,6 +34,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private TbUserMapper userDao;
+
+    @Autowired
+    private TbDeptMapper deptDao;
 
     /**
      * 通过传来的临时授权字符换code,从微信小程序中获取openid,发送的变量中有appid,appsecret,code,
@@ -201,5 +205,29 @@ public class UserServiceImpl implements UserService {
     public HashMap searchUserSummary(int userId) {
         HashMap map = userDao.searchUserSummary(userId);
         return map;
+    }
+
+    @Override
+    public ArrayList<HashMap> searchUserGroupByDept(String keyword) {
+        ArrayList<HashMap> list_1 = deptDao.searchDeptMembers(keyword);
+        ArrayList<HashMap> list_2 = userDao.searchUserGroupByDept(keyword);
+        for (HashMap map_1 : list_1) {
+            long deptId = (Long) map_1.get("id");
+            ArrayList members = new ArrayList();
+            for (HashMap map_2 : list_2) {
+                long id = (Long) map_2.get("deptId");
+                if (deptId == id) {
+                    members.add(map_2);
+                }
+            }
+            map_1.put("members", members);
+        }
+        return list_1;
+    }
+
+    @Override
+    public ArrayList<HashMap> searchMembers(List param) {
+        ArrayList<HashMap> list = userDao.searchMembers(param);
+        return list;
     }
 }

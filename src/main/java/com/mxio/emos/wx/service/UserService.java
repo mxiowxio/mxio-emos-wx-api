@@ -2,7 +2,9 @@ package com.mxio.emos.wx.service;
 
 import com.mxio.emos.wx.db.pojo.TbUserPo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,5 +46,12 @@ public interface UserService {
      * 查询员工摘要信息
      */
     public HashMap searchUserSummary(int userId);
+
+    /**
+     * 查询员工列表，按照部门分组排列
+     */
+    public ArrayList<HashMap> searchUserGroupByDept(String keyword);
+
+    public ArrayList<HashMap> searchMembers(List param);
 
 }

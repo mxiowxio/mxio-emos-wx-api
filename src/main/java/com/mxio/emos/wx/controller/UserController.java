@@ -37,7 +37,7 @@ public class UserController {
 
     /**
      * 调用业务层代码
-      */
+     */
     @Autowired
     private UserService userService;
 
@@ -155,4 +155,23 @@ public class UserController {
         return R.ok().put("result", map);
     }
 
+    @PostMapping("/searchUserGroupByDept")
+    @ApiOperation("查询员工列表，按照部门分组排列")
+    @RequiresPermissions(value = {"ROOT", "EMPLOYEE:SELECT"}, logical = Logical.OR)
+    public R searchUserGroupByDept(@Valid @RequestBody SearchUserGroupByDeptForm form) {
+        ArrayList<HashMap> list = userService.searchUserGroupByDept(form.getKeyword());
+        return R.ok().put("result", list);
+    }
+
+    @PostMapping("/searchMembers")
+    @ApiOperation("查询成员")
+    @RequiresPermissions(value = {"ROOT", "MEETING:INSERT", "MEETING:UPDATE"},logical = Logical.OR)
+    public R searchMembers(@Valid @RequestBody SearchMembersForm form){
+        if(!JSONUtil.isJsonArray(form.getMembers())){
+            throw new EmosException("members不是JSON数组");
+        }
+        List param=JSONUtil.parseArray(form.getMembers()).toList(Integer.class);
+        ArrayList list=userService.searchMembers(param);
+        return R.ok().put("result",list);
+    }
 }
