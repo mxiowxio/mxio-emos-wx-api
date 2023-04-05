@@ -148,4 +148,39 @@
         JOIN tb_role r ON JSON_CONTAINS(u.role, CAST(r.id AS CHAR))
         WHERE r.id=1 AND u.status = 1
     </select>
+
+    <select id="listUsers" resultType="com.mxio.emos.wx.entity.vo.UserVO">
+        select tu.*,
+            (
+                select td.`dept_name`
+                from tb_dept td
+                where td.id = tu.dept_id
+            ) as deptName
+        from tb_user tu
+        <where>
+            <if test="query != null">
+                <if test="query.deptId != null and query.deptId > 0">
+                    and (tu.dept_id = #{query.deptId} )
+                </if>
+                <if test="query.username != null and query.username != ''">
+                    and tu.username like CONCAT('%', #{query.username}, '%')
+                </if>
+                <if test="query.status != null">
+                    and tu.status = #{query.status}
+                </if>
+                <if test="query.name != null and query.name != ''">
+                    and tu.name like CONCAT('%', #{query.name}, '%')
+                </if>
+                <if test="query.tel != null and query.tel != ''">
+                    and tu.tel like CONCAT('%', #{query.tel}, '%')
+                </if>
+                <if test="query.startTime != null and query.startTime != ''"><!-- 开始时间检索 -->
+                    AND date_format(tu.create_time,'%y%m%d') &gt;= date_format(#{query.startTime},'%y%m%d')
+                </if>
+                <if test="query.endTime != null and query.endTime != ''"><!-- 结束时间检索 -->
+                    AND date_format(tu.create_time,'%y%m%d') &lt;= date_format(#{query.endTime},'%y%m%d')
+                </if>
+            </if>
+        </where>
+    </select>
 </mapper>

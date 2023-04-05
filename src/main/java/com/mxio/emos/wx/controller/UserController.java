@@ -5,17 +5,24 @@ import com.mxio.emos.wx.common.util.R;
 import com.mxio.emos.wx.config.shiro.JwtUtil;
 //import com.mxio.emos.wx.config.tencent.TLSSigAPIv2;
 import com.mxio.emos.wx.controller.form.*;
+import com.mxio.emos.wx.db.pojo.TbDeptPo;
 import com.mxio.emos.wx.db.pojo.TbUserPo;
+import com.mxio.emos.wx.entity.req.BaseDeleteIds;
+import com.mxio.emos.wx.entity.req.VerifyGroups;
+import com.mxio.emos.wx.entity.resp.PageResult;
 import com.mxio.emos.wx.exception.EmosException;
 import com.mxio.emos.wx.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -120,6 +127,68 @@ public class UserController {
         return R.ok("登陆成功").put("token", token).put("permission", permsSet).put("userInfo", userInfo);
     }
 
+    @PostMapping("/login-to-admin")
+    @ApiOperation("登陆后台系统")
+    public R loginToAdmin(@Valid @RequestBody LoginToAdminDTO loginToAdminDTO) {
+
+        Integer id = userService.loginToAdmin(loginToAdminDTO);
+
+        // 根据用户的id生成token，令牌
+        String token = jwtUtil.createToken(id);
+        // 保留token 以及对应 id
+        saveCacheToken(token, id);
+        // 根据id搜索用户的权限，不重复set
+        Set<String> permsSet = userService.searchUserPermissions(id);
+        TbUserPo userInfo = userService.getUserInfo(id);
+
+        //根据opid查询用户信息
+        //判断是否有工号
+        //有则正常返回，没有则返回错误，提升该人员非公司员工
+        // 返回
+        // .put("userInfo",userInfo)
+        HashMap<String, Object> res = new HashMap<>(16);
+        res.put("token", token);
+        res.put("permission", permsSet);
+        res.put("userInfo", userInfo);
+        return R.ok("登陆成功").put("data", res);
+    }
+
+    @GetMapping("/dept-tree")
+    @ApiOperation("获取部门树")
+    public R listDeptTree() {
+        List<TbDeptPo> deptList = userService.listDeptTree();
+        return R.ok().put("data", deptList);
+    }
+
+    @ApiOperation(value = "分页查询用户列表")
+    @RequestMapping(value = "/list", method = {RequestMethod.GET, RequestMethod.POST})
+    public R listUsers(UserQueryReq query) {
+        PageResult result = userService.listUsers(query);
+        return R.ok().put("data", result);
+    }
+
+    @ApiOperation(value = "更新用户状态")
+    @PutMapping("/change-state")
+    public R changeUserState(@RequestBody @Valid ChangeUserStateDTO params) {
+        userService.changeUserState(params);
+        return R.ok();
+    }
+
+    @ApiOperation(value = "删除（单/多个）用户")
+    @DeleteMapping
+    public R deleteUsers(@RequestBody @Valid BaseDeleteIds ids) {
+        userService.deleteUsers(ids.getIds());
+        return R.ok();
+    }
+
+    @ApiOperation(value = "更新用户")
+    @PutMapping
+    public R updateUser(@RequestBody @Validated(value = {VerifyGroups.Update.class}) UserDTO user) {
+        userService.updateUser(user);
+        return R.ok();
+    }
+
+
     /**
      * 根据OPENId查询用户信息
      *
@@ -144,6 +213,7 @@ public class UserController {
         // 返回
         return R.ok("登陆成功").put("token", token).put("permission", permsSet);
     }
+
 
     @GetMapping("searchUserSummary")
     @ApiOperation("查询用户摘要信息")
@@ -173,5 +243,13 @@ public class UserController {
         List param=JSONUtil.parseArray(form.getMembers()).toList(Integer.class);
         ArrayList list=userService.searchMembers(param);
         return R.ok().put("result",list);
+    }
+
+    @PostMapping("logout")
+    @ApiOperation("注销登录")
+    public R logout() {
+        Subject currentUser = SecurityUtils.getSubject();
+        currentUser.logout(); // Shiro认证信息清除
+        return R.ok();
     }
 }

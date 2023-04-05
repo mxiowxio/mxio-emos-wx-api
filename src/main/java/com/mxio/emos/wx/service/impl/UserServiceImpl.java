@@ -1,15 +1,29 @@
 package com.mxio.emos.wx.service.impl;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.MD5;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mxio.emos.wx.controller.form.ChangeUserStateDTO;
+import com.mxio.emos.wx.controller.form.LoginToAdminDTO;
+import com.mxio.emos.wx.controller.form.UserDTO;
+import com.mxio.emos.wx.controller.form.UserQueryReq;
 import com.mxio.emos.wx.db.mapper.TbDeptMapper;
 import com.mxio.emos.wx.db.mapper.TbUserMapper;
+import com.mxio.emos.wx.db.pojo.TbDeptPo;
 import com.mxio.emos.wx.db.pojo.TbUserPo;
+import com.mxio.emos.wx.entity.resp.PageResult;
+import com.mxio.emos.wx.entity.vo.UserVO;
 import com.mxio.emos.wx.exception.EmosException;
 import com.mxio.emos.wx.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -24,7 +38,8 @@ import java.util.*;
 @Service
 @Slf4j
 @Scope("prototype")
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<TbUserMapper, TbUserPo>
+        implements UserService {
 
     @Value("${wx.app-id}")
     private String appId;
@@ -230,4 +245,78 @@ public class UserServiceImpl implements UserService {
         ArrayList<HashMap> list = userDao.searchMembers(param);
         return list;
     }
+
+    @Override
+    public Integer loginToAdmin(LoginToAdminDTO loginToAdminDTO) {
+        loginToAdminDTO.setPassword(MD5.create().digestHex(loginToAdminDTO.getPassword().trim()));
+        log.info("md5 => [{}]", loginToAdminDTO.getPassword());
+        TbUserPo tbUserPo = baseMapper.selectOne(
+                Wrappers.lambdaQuery(TbUserPo.class)
+                        .eq(TbUserPo::getUsername, loginToAdminDTO.getUsername().trim())
+                        .eq(TbUserPo::getPassword, loginToAdminDTO.getPassword())
+        );
+        if (Objects.isNull(tbUserPo)) {
+            throw new EmosException("用户名或密码错误");
+        }
+        Set<String> perms = searchUserPermissions(tbUserPo.getId());
+        if (!perms.contains("ROOT")) {
+            throw new EmosException("该用户无权限访问");
+        }
+        return tbUserPo.getId();
+    }
+
+    @Override
+    public List<TbDeptPo> listDeptTree() {
+        return deptDao.selectList(null);
+    }
+
+    @Override
+    public PageResult listUsers(UserQueryReq query) {
+        IPage<UserVO> page = baseMapper.listUsers(
+                new Page<>(query.getCurrent(), query.getSize()),
+                query
+        );
+        return new PageResult(page);
+    }
+
+    @Override
+    public void changeUserState(ChangeUserStateDTO params) {
+        TbUserPo tbUserPo = new TbUserPo();
+        tbUserPo.setId(params.getId());
+        if (Boolean.TRUE.equals(params.getStatus())) {
+            tbUserPo.setStatus((byte) 1);
+        } else {
+            tbUserPo.setStatus((byte) 0);
+        }
+        baseMapper.updateById(tbUserPo);
+    }
+
+    @Override
+    public void deleteUsers(List<Long> ids) {
+        baseMapper.deleteBatchIds(ids);
+    }
+
+    @Override
+    public void updateUser(UserDTO user) {
+        TbUserPo tbUserPo = baseMapper.selectById(user.getId());
+
+        if (tbUserPo == null) {
+            throw new EmosException("用户不存在");
+        }
+
+        if (StrUtil.isNotBlank(user.getPassword())) {
+            user.setPassword(MD5.create().digestHex(user.getPassword()));
+        }
+
+        BeanUtils.copyProperties(user, tbUserPo);
+
+        if (Boolean.TRUE.equals(user.getStatus())) {
+            tbUserPo.setStatus((byte) 1);
+        } else {
+            tbUserPo.setStatus((byte) 0);
+        }
+        tbUserPo.setRole(user.getRoleIds());
+        baseMapper.updateById(tbUserPo);
+    }
+
 }

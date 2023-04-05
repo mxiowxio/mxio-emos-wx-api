@@ -1,12 +1,15 @@
 package com.mxio.emos.wx.db.pojo;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
  * 疫情城市列表
  * @TableName tb_city
  */
+@TableName(value = "tb_city")
 @Data
 public class TbCityPo implements Serializable {
     /**

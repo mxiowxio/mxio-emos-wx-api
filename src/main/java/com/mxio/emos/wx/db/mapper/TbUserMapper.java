@@ -1,6 +1,11 @@
 package com.mxio.emos.wx.db.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mxio.emos.wx.controller.form.UserQueryReq;
 import com.mxio.emos.wx.db.pojo.TbUserPo;
+import com.mxio.emos.wx.entity.vo.UserVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.ArrayList;
@@ -11,7 +16,7 @@ import java.util.Set;
 /**
  * @Entity com.mxio.emos.wx.db.pojo.TbUserPo
  */
-public interface TbUserMapper {
+public interface TbUserMapper extends BaseMapper<TbUserPo> {
 
     public Boolean haveRootUser();
 
@@ -40,6 +45,15 @@ public interface TbUserMapper {
     public int searchDeptManagerId(int id);
 
     public int searchGmId();
+
+    /**
+     * 获取用户列表
+     *
+     * @param page  分页对象
+     * @param query 查询参数
+     * @return 用户列表
+     */
+    IPage<UserVO> listUsers(Page<UserVO> page, @Param("query") UserQueryReq query);
 }
 
 

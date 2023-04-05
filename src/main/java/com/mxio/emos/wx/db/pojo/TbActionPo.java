@@ -1,12 +1,15 @@
 package com.mxio.emos.wx.db.pojo;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
  * 行为表
  * @TableName tb_action
  */
+@TableName(value = "tb_action")
 @Data
 public class TbActionPo implements Serializable {
     /**

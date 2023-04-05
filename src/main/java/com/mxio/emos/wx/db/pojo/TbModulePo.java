@@ -1,12 +1,15 @@
 package com.mxio.emos.wx.db.pojo;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
  * 模块资源表
  * @TableName tb_module
  */
+@TableName(value = "tb_module")
 @Data
 public class TbModulePo implements Serializable {
     /**

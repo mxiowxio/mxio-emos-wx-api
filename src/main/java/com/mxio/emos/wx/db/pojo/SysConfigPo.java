@@ -1,12 +1,15 @@
 package com.mxio.emos.wx.db.pojo;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
  * 
  * @TableName sys_config
  */
+@TableName(value = "sys_config")
 @Data
 public class SysConfigPo implements Serializable {
     /**

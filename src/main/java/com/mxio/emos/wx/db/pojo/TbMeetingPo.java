@@ -2,12 +2,15 @@ package com.mxio.emos.wx.db.pojo;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
  * 会议表
  * @TableName tb_meeting
  */
+@TableName(value = "tb_meeting")
 @Data
 public class TbMeetingPo implements Serializable {
     /**

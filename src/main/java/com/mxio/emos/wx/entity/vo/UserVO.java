@@ -1,18 +1,19 @@
-package com.mxio.emos.wx.db.pojo;
+package com.mxio.emos.wx.entity.vo;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.util.Date;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
 /**
- * 用户表
- * @TableName tb_user
+ * @author mxio
  */
-@TableName(value = "tb_user")
 @Data
-public class TbUserPo implements Serializable {
+@ToString
+public class UserVO {
+
     /**
      * 主键
      */
@@ -27,12 +28,6 @@ public class TbUserPo implements Serializable {
      *  用户名
      */
     private String username;
-
-
-    /**
-     * 密码
-     */
-    private String password;
 
     /**
      * 昵称
@@ -84,15 +79,17 @@ public class TbUserPo implements Serializable {
      */
     private Integer deptId;
 
+    private String deptName;
+
     /**
      * 状态
      */
-    private Byte status;
+    private Boolean status;
 
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
-    private static final long serialVersionUID = 1L;
 }
